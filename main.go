@@ -10,6 +10,7 @@ import (
 	"os"
 )
 
+// Uncomment this for working example
 //func main() {
 //	f, err := os.Open("samples/weather.csv")
 //	if err != nil {
@@ -47,6 +48,7 @@ import (
 //	fmt.Println(prediction)
 //}
 
+// Refactored example
 func main() {
 	f, err := os.Open("samples/weather.csv")
 	if err != nil {
