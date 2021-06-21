@@ -2,7 +2,6 @@ package models
 
 import (
 	"fmt"
-	"io/ioutil"
 	"main/app/structs"
 	"math"
 
@@ -10,7 +9,7 @@ import (
 	"gorgonia.org/tensor"
 )
 
-type LinearModel struct {
+type linearModel struct {
 	g        *G.ExprGraph
 	Y        *G.Node
 	Pred     *G.Node
@@ -20,8 +19,8 @@ type LinearModel struct {
 	ErrorStd *G.Node
 }
 
-func NewLinearModel(y *tensor.Dense, x *tensor.Dense) (*LinearModel, error) {
-	m := LinearModel{}
+func NewLinearModel(y *tensor.Dense, x *tensor.Dense) (*linearModel, error) {
+	m := linearModel{}
 	m.g = G.NewGraph()
 
 	m.Y = G.NodeFromAny(m.g, y, G.WithName("y"))
@@ -39,7 +38,7 @@ func NewLinearModel(y *tensor.Dense, x *tensor.Dense) (*LinearModel, error) {
 	m.Pred, err = G.Mul(m.X, theta)
 
 	estError, err := G.Sub(m.Y, m.Pred)
-	m.ErrorStd, err = G.Sum(G.Must(G.Square(estError)))
+	m.ErrorStd, err = G.Mean(G.Must(G.Square(estError)))
 
 	d := G.NewScalar(m.g, G.Float64, G.WithName("degrees of freedom"), G.WithValue(-1.0))
 	a, err := G.Div(m.ErrorStd, d)
@@ -52,14 +51,7 @@ func NewLinearModel(y *tensor.Dense, x *tensor.Dense) (*LinearModel, error) {
 	return &m, nil
 }
 
-func (m *LinearModel) Visualize() {
-	err := ioutil.WriteFile("simple_graph.dot", []byte(m.g.ToDot()), 0644)
-	if err != nil {
-		fmt.Println(err)
-	}
-}
-
-func (m *LinearModel) Fit() {
+func (m *linearModel) Fit() {
 	machine := G.NewTapeMachine(m.g)
 	defer machine.Close()
 
@@ -68,7 +60,7 @@ func (m *LinearModel) Fit() {
 	}
 }
 
-func (m *LinearModel) Predict(T int) []structs.ResponseRow {
+func (m *linearModel) Predict(T int) []structs.ResponseRow {
 	theta := m.Theta.Value().Data().([]float64)
 	errorStd := m.ErrorStd.Value().Data().(float64)
 
@@ -114,8 +106,6 @@ func (m *LinearModel) Predict(T int) []structs.ResponseRow {
 		yPredicted := multiply(x, theta)
 		IntervalOffset := getIntervalOffset(i)
 
-		fmt.Println(theta)
-		fmt.Println(IntervalOffset)
 		response = append(response, structs.ResponseRow{
 			PredictedValue: yPredicted[0],
 			LowerBound:     yPredicted[0] - IntervalOffset*1.96,

@@ -13,7 +13,6 @@ require (
 	github.com/google/flatbuffers v2.0.0+incompatible // indirect
 	github.com/joho/godotenv v1.3.0
 	github.com/leesper/go_rng v0.0.0-20190531154944-a612b043e353 // indirect
-	gitlab.ptnl.moscow/polymatica/common/backend/app-types v0.2.3
 	gonum.org/v1/gonum v0.9.1
 	gorgonia.org/gorgonia v0.9.17
 	gorgonia.org/tensor v0.9.20
